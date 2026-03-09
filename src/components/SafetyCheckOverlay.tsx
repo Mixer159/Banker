@@ -29,7 +29,11 @@ export function SafetyCheckOverlay({
   const [completedClients, setCompletedClients] = useState<Set<number>>(
     new Set()
   );
-  const [animatedWork, setAnimatedWork] = useState(available);
+  // Use the workBefore from the first step as initial value — this is the
+  // tentative available that the safety check actually ran with
+  const [animatedWork, setAnimatedWork] = useState(
+    safetyResult.steps[0]?.workBefore ?? available
+  );
   const [isPlaying, setIsPlaying] = useState(true);
 
   const steps = safetyResult.steps;

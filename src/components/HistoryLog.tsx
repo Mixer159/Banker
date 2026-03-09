@@ -4,10 +4,10 @@ import { motion, AnimatePresence } from "motion/react";
 import type { HistoryEntry } from "@/hooks/useBankerState";
 
 const reasonText: Record<string, string> = {
-  ok: "Schvaleno",
-  exceeds_need: "Zamitnuto \u2014 presahuje potrebu",
-  exceeds_available: "Zamitnuto \u2014 nedostatek prostredku",
-  unsafe: "Zamitnuto \u2014 nebezpecny stav",
+  ok: "Schváleno",
+  exceeds_need: "Zamítnuto — přesahuje potřebu",
+  exceeds_available: "Zamítnuto — nedostatek prostředků",
+  unsafe: "Zamítnuto — nebezpečný stav",
 };
 
 interface HistoryLogProps {
@@ -18,7 +18,7 @@ export function HistoryLog({ entries }: HistoryLogProps) {
   if (entries.length === 0) {
     return (
       <p className="text-sm text-amber-500 italic text-center py-4">
-        Zatim zadne zadosti.
+        Zatím žádné žádosti.
       </p>
     );
   }
@@ -55,9 +55,9 @@ export function HistoryLog({ entries }: HistoryLogProps) {
                   </span>
                 </div>
                 <p className="text-sm text-gray-700 mt-0.5">
-                  Zadost o{" "}
+                  Žádost o{" "}
                   <span className="font-semibold">
-                    {entry.request.toLocaleString("cs-CZ")} Kc
+                    {entry.request.toLocaleString("cs-CZ")} Kč
                   </span>
                 </p>
                 <p
@@ -69,7 +69,7 @@ export function HistoryLog({ entries }: HistoryLogProps) {
                 </p>
                 {entry.safeSequence && (
                   <p className="text-xs text-gray-500 mt-1">
-                    Bezpecna posloupnost:{" "}
+                    Bezpečná posloupnost:{" "}
                     {entry.safeSequence.map((id) => `K${id + 1}`).join(" \u2192 ")}
                   </p>
                 )}

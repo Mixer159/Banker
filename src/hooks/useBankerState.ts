@@ -44,7 +44,6 @@ type Action =
   | { type: "UPDATE_CLIENT"; id: number; max: number; allocated: number }
   | { type: "START_SIMULATION" }
   | { type: "SUBMIT_REQUEST"; clientIndex: number; amount: number }
-  | { type: "SHOW_SAFETY_CHECK" }
   | { type: "COMPLETE_SAFETY_CHECK" }
   | { type: "SET_ERROR"; error: string | null }
   | { type: "RESET" };

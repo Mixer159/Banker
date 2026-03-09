@@ -49,7 +49,7 @@ export function RequestForm({ clients, onSubmit }: RequestFormProps) {
               className="w-full h-12 gap-2 rounded-xl bg-amber-600 text-white font-semibold shadow-lg hover:bg-amber-700 hover:shadow-xl transition-all"
             >
               <HandCoins className="size-5" />
-              Nova zadost o pujcku
+              Nová žádost o půjčku
             </Button>
           </motion.div>
         ) : (
@@ -63,7 +63,7 @@ export function RequestForm({ clients, onSubmit }: RequestFormProps) {
             <div className="flex items-center justify-between">
               <h3 className="font-semibold text-amber-900 flex items-center gap-2">
                 <HandCoins className="size-5 text-amber-600" />
-                Nova zadost o pujcku
+                Nová žádost o půjčku
               </h3>
               <Button
                 variant="ghost"
@@ -94,7 +94,7 @@ export function RequestForm({ clients, onSubmit }: RequestFormProps) {
                       {client.name}
                     </span>
                     <span className="block text-xs text-amber-600">
-                      potreba: {client.need.toLocaleString("cs-CZ")}
+                      potřeba: {client.need.toLocaleString("cs-CZ")}
                     </span>
                   </button>
                 ))}
@@ -104,7 +104,7 @@ export function RequestForm({ clients, onSubmit }: RequestFormProps) {
             {/* Amount input */}
             <div className="space-y-1">
               <Label htmlFor="request-amount" className="text-amber-800 text-sm">
-                Castka
+                Částka
               </Label>
               <Input
                 id="request-amount"
@@ -112,7 +112,7 @@ export function RequestForm({ clients, onSubmit }: RequestFormProps) {
                 min={1}
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
-                placeholder="Zadejte castku..."
+                placeholder="Zadejte částku..."
                 className="border-amber-200 focus-visible:border-amber-400 focus-visible:ring-amber-200"
               />
             </div>
@@ -125,14 +125,14 @@ export function RequestForm({ clients, onSubmit }: RequestFormProps) {
                 className="flex-1 gap-2 bg-amber-600 text-white font-semibold hover:bg-amber-700 disabled:opacity-50"
               >
                 <Send className="size-4" />
-                Odeslat zadost
+                Odeslat žádost
               </Button>
               <Button
                 variant="outline"
                 onClick={handleCancel}
                 className="border-amber-200 text-amber-700 hover:bg-amber-50"
               >
-                Zrusit
+                Zrušit
               </Button>
             </div>
           </motion.div>
