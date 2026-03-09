@@ -4,6 +4,7 @@ import {
   runSafetyCheck,
   processRequest,
   validateSetup,
+  findShortestRoute,
 } from "./banker";
 
 describe("createClient", () => {
@@ -119,5 +120,46 @@ describe("validateSetup", () => {
   it("rejects empty clients", () => {
     const result = validateSetup(10, []);
     expect(result.valid).toBe(false);
+  });
+});
+
+describe("findShortestRoute", () => {
+  it("finds 2-step route for classic example", () => {
+    const clients = [
+      createClient(0, 5_000_000, 0),
+      createClient(1, 5_000_000, 0),
+      createClient(2, 10_000_000, 0),
+      createClient(3, 9_000_000, 0),
+    ];
+    const result = findShortestRoute(20_000_000, clients);
+    expect(result.possible).toBe(true);
+    expect(result.totalSteps).toBe(2);
+    expect(result.steps[0].clientIds).toHaveLength(3);
+    expect(result.steps[1].clientIds).toHaveLength(1);
+  });
+
+  it("returns impossible when a client needs more than total", () => {
+    const clients = [createClient(0, 25_000_000, 0)];
+    const result = findShortestRoute(20_000_000, clients);
+    expect(result.possible).toBe(false);
+  });
+
+  it("serves all clients in 1 step when they all fit", () => {
+    const clients = [
+      createClient(0, 5_000_000, 0),
+      createClient(1, 5_000_000, 0),
+      createClient(2, 5_000_000, 0),
+    ];
+    const result = findShortestRoute(20_000_000, clients);
+    expect(result.possible).toBe(true);
+    expect(result.totalSteps).toBe(1);
+    expect(result.steps[0].clientIds).toHaveLength(3);
+  });
+
+  it("handles single client", () => {
+    const clients = [createClient(0, 10_000_000, 0)];
+    const result = findShortestRoute(10_000_000, clients);
+    expect(result.possible).toBe(true);
+    expect(result.totalSteps).toBe(1);
   });
 });

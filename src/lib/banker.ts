@@ -28,6 +28,83 @@ export interface RequestResult {
   safetyResult?: SafetyResult;
 }
 
+export interface RouteStep {
+  stepNumber: number;
+  clientIds: number[];
+  clientNames: string[];
+  totalLent: number;
+  availableBefore: number;
+  availableAfter: number; // same as availableBefore since money returns
+}
+
+export interface RouteResult {
+  possible: boolean;
+  steps: RouteStep[];
+  totalSteps: number;
+}
+
+/**
+ * Najde nejkratší cestu půjčení — minimální počet kol pro obsloužení všech klientů.
+ * V každém kole bankéř půjčí skupině klientů, ti vrátí peníze, a pokračuje se dalším kolem.
+ */
+export function findShortestRoute(
+  totalResources: number,
+  clients: Client[]
+): RouteResult {
+  // Check if any single client needs more than total
+  for (const c of clients) {
+    if (c.need > totalResources) {
+      return { possible: false, steps: [], totalSteps: 0 };
+    }
+  }
+
+  const remaining = new Set(clients.map((_, i) => i));
+  const steps: RouteStep[] = [];
+  let stepNumber = 1;
+
+  while (remaining.size > 0) {
+    // Find the largest subset that fits within totalResources
+    const indices = Array.from(remaining);
+    let bestSubset: number[] = [];
+
+    // Brute-force all subsets (max 2^4 = 16)
+    for (let mask = 1; mask < (1 << indices.length); mask++) {
+      const subset: number[] = [];
+      let total = 0;
+      for (let bit = 0; bit < indices.length; bit++) {
+        if (mask & (1 << bit)) {
+          subset.push(indices[bit]);
+          total += clients[indices[bit]].need;
+        }
+      }
+      if (total <= totalResources && subset.length > bestSubset.length) {
+        bestSubset = subset;
+      }
+    }
+
+    if (bestSubset.length === 0) {
+      return { possible: false, steps: [], totalSteps: 0 };
+    }
+
+    const totalLent = bestSubset.reduce((sum, i) => sum + clients[i].need, 0);
+    steps.push({
+      stepNumber,
+      clientIds: bestSubset.map((i) => clients[i].id),
+      clientNames: bestSubset.map((i) => clients[i].name),
+      totalLent,
+      availableBefore: totalResources,
+      availableAfter: totalResources,
+    });
+
+    for (const i of bestSubset) {
+      remaining.delete(i);
+    }
+    stepNumber++;
+  }
+
+  return { possible: true, steps, totalSteps: steps.length };
+}
+
 export function createClient(id: number, max: number, allocated: number): Client {
   return {
     id,
