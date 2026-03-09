@@ -3,6 +3,7 @@
 import { AnimatePresence, motion } from "motion/react";
 import { useBankerState } from "@/hooks/useBankerState";
 import { SetupPhase } from "@/components/SetupPhase";
+import { RouteVisualization } from "@/components/RouteVisualization";
 import { FloatingCoins } from "@/components/FloatingCoins";
 
 export default function Home() {
@@ -48,12 +49,14 @@ export default function Home() {
             onStart={startRoute}
           />
         )}
-        {/* Route visualization will be wired in Task 5 */}
         {state.phase === "route" && state.routeResult && (
-          <div key="route" className="mx-auto max-w-4xl px-4 py-8 text-center text-amber-900">
-            <p>Route visualization coming soon...</p>
-            <button onClick={reset} className="mt-4 underline">Reset</button>
-          </div>
+          <RouteVisualization
+            key="route"
+            routeResult={state.routeResult}
+            clients={state.clients}
+            totalResources={state.totalResources}
+            onReset={reset}
+          />
         )}
       </AnimatePresence>
     </main>
