@@ -121,6 +121,7 @@ export function RouteVisualization({
   function handleStep() {
     if (!started) {
       setStarted(true)
+      return
     }
     if (!complete) {
       advancePhase()
