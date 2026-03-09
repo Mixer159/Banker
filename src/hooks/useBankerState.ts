@@ -62,8 +62,15 @@ const initialState: BankerState = {
 
 function reducer(state: BankerState, action: Action): BankerState {
   switch (action.type) {
-    case "SET_TOTAL":
-      return { ...state, totalResources: action.total, error: null };
+    case "SET_TOTAL": {
+      const sumAlloc = state.clients.reduce((s, c) => s + c.allocated, 0);
+      return {
+        ...state,
+        totalResources: action.total,
+        available: action.total - sumAlloc,
+        error: null,
+      };
+    }
 
     case "ADD_CLIENT": {
       if (state.clients.length >= 4) return state;

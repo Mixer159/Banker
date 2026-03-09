@@ -4,8 +4,8 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { HandCoins, Send, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { NumberInput } from "@/components/NumberInput";
 import type { Client } from "@/lib/banker";
 
 interface RequestFormProps {
@@ -16,21 +16,20 @@ interface RequestFormProps {
 export function RequestForm({ clients, onSubmit }: RequestFormProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedClient, setSelectedClient] = useState<number | null>(null);
-  const [amount, setAmount] = useState("");
+  const [amount, setAmount] = useState(0);
 
   function handleSubmit() {
     if (selectedClient === null) return;
-    const numAmount = Number(amount);
-    if (!numAmount || numAmount <= 0) return;
-    onSubmit(selectedClient, numAmount);
+    if (amount <= 0) return;
+    onSubmit(selectedClient, amount);
     setSelectedClient(null);
-    setAmount("");
+    setAmount(0);
     setIsOpen(false);
   }
 
   function handleCancel() {
     setSelectedClient(null);
-    setAmount("");
+    setAmount(0);
     setIsOpen(false);
   }
 
@@ -104,14 +103,13 @@ export function RequestForm({ clients, onSubmit }: RequestFormProps) {
             {/* Amount input */}
             <div className="space-y-1">
               <Label htmlFor="request-amount" className="text-amber-800 text-sm">
-                Částka
+                Částka (Kč)
               </Label>
-              <Input
+              <NumberInput
                 id="request-amount"
-                type="number"
                 min={1}
                 value={amount}
-                onChange={(e) => setAmount(e.target.value)}
+                onChange={setAmount}
                 placeholder="Zadejte částku..."
                 className="border-amber-200 focus-visible:border-amber-400 focus-visible:ring-amber-200"
               />
@@ -121,7 +119,7 @@ export function RequestForm({ clients, onSubmit }: RequestFormProps) {
             <div className="flex gap-2">
               <Button
                 onClick={handleSubmit}
-                disabled={selectedClient === null || !amount || Number(amount) <= 0}
+                disabled={selectedClient === null || amount <= 0}
                 className="flex-1 gap-2 bg-amber-600 text-white font-semibold hover:bg-amber-700 disabled:opacity-50"
               >
                 <Send className="size-4" />

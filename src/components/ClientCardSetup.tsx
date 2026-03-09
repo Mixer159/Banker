@@ -4,19 +4,15 @@ import { useState } from "react";
 import { motion } from "motion/react";
 import { X } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardAction } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { AnimatedNumber } from "@/components/AnimatedNumber";
+import { NumberInput } from "@/components/NumberInput";
 
 interface ClientCardSetupProps {
   id: number;
   name: string;
   max: number;
-  allocated: number;
-  need: number;
   onChangeMax: (val: number) => void;
-  onChangeAllocated: (val: number) => void;
   onRemove: () => void;
 }
 
@@ -24,10 +20,7 @@ export function ClientCardSetup({
   id,
   name,
   max,
-  allocated,
-  need,
   onChangeMax,
-  onChangeAllocated,
   onRemove,
 }: ClientCardSetupProps) {
   const [rotateX, setRotateX] = useState(0);
@@ -84,35 +77,14 @@ export function ClientCardSetup({
           <CardContent className="space-y-3">
             <div className="space-y-1">
               <Label htmlFor={`max-${id}`} className="text-amber-800 text-xs">
-                Maximum
+                Maximální požadavek (Kč)
               </Label>
-              <Input
+              <NumberInput
                 id={`max-${id}`}
-                type="number"
-                min={0}
                 value={max}
-                onChange={(e) => onChangeMax(Number(e.target.value) || 0)}
+                onChange={onChangeMax}
+                placeholder="např. 5 000 000"
                 className="border-amber-200 focus-visible:border-amber-400 focus-visible:ring-amber-200"
-              />
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor={`alloc-${id}`} className="text-amber-800 text-xs">
-                Přiděleno
-              </Label>
-              <Input
-                id={`alloc-${id}`}
-                type="number"
-                min={0}
-                value={allocated}
-                onChange={(e) => onChangeAllocated(Number(e.target.value) || 0)}
-                className="border-amber-200 focus-visible:border-amber-400 focus-visible:ring-amber-200"
-              />
-            </div>
-            <div className="flex items-center justify-between rounded-lg bg-amber-50 px-3 py-2">
-              <span className="text-xs font-medium text-amber-700">Potřebuje</span>
-              <AnimatedNumber
-                value={need}
-                className="text-lg font-bold text-amber-900"
               />
             </div>
           </CardContent>
