@@ -3,48 +3,31 @@
 import { useReducer, useCallback } from "react";
 import {
   Client,
-  SafetyResult,
+  RouteResult,
   createClient,
-  processRequest,
   validateSetup,
-  runSafetyCheck,
+  findShortestRoute,
 } from "@/lib/banker";
 
 // --- Types ---
 
-export interface HistoryEntry {
-  id: number;
-  clientId: number;
-  clientName: string;
-  request: number;
-  approved: boolean;
-  reason: string;
-  safeSequence?: number[];
-  timestamp: Date;
-}
-
-export type Phase = "setup" | "simulation" | "safety-check";
+export type Phase = "setup" | "route";
 
 export interface BankerState {
   totalResources: number;
   available: number;
   clients: Client[];
   phase: Phase;
-  setupStep: number;
-  safetyResult: SafetyResult | null;
-  history: HistoryEntry[];
+  routeResult: RouteResult | null;
   error: string | null;
-  pendingRequest: { clientIndex: number; amount: number } | null;
 }
 
 type Action =
   | { type: "SET_TOTAL"; total: number }
-  | { type: "ADD_CLIENT"; max: number; allocated: number }
+  | { type: "ADD_CLIENT"; max: number }
   | { type: "REMOVE_CLIENT"; id: number }
-  | { type: "UPDATE_CLIENT"; id: number; max: number; allocated: number }
-  | { type: "START_SIMULATION" }
-  | { type: "SUBMIT_REQUEST"; clientIndex: number; amount: number }
-  | { type: "COMPLETE_SAFETY_CHECK" }
+  | { type: "UPDATE_CLIENT"; id: number; max: number }
+  | { type: "START_ROUTE" }
   | { type: "SET_ERROR"; error: string | null }
   | { type: "RESET" };
 
@@ -53,11 +36,8 @@ const initialState: BankerState = {
   available: 0,
   clients: [],
   phase: "setup",
-  setupStep: 0,
-  safetyResult: null,
-  history: [],
+  routeResult: null,
   error: null,
-  pendingRequest: null,
 };
 
 function reducer(state: BankerState, action: Action): BankerState {
@@ -74,17 +54,12 @@ function reducer(state: BankerState, action: Action): BankerState {
 
     case "ADD_CLIENT": {
       if (state.clients.length >= 4) return state;
-      const newClient = createClient(
-        state.clients.length,
-        action.max,
-        action.allocated
-      );
+      const newClient = createClient(state.clients.length, action.max, 0);
       const newClients = [...state.clients, newClient];
-      const sumAlloc = newClients.reduce((s, c) => s + c.allocated, 0);
       return {
         ...state,
         clients: newClients,
-        available: state.totalResources - sumAlloc,
+        available: state.totalResources,
         error: null,
       };
     }
@@ -92,82 +67,38 @@ function reducer(state: BankerState, action: Action): BankerState {
     case "REMOVE_CLIENT": {
       const filtered = state.clients
         .filter((c) => c.id !== action.id)
-        .map((c, i) => createClient(i, c.max, c.allocated));
-      const sumAlloc = filtered.reduce((s, c) => s + c.allocated, 0);
+        .map((c, i) => createClient(i, c.max, 0));
       return {
         ...state,
         clients: filtered,
-        available: state.totalResources - sumAlloc,
+        available: state.totalResources,
         error: null,
       };
     }
 
     case "UPDATE_CLIENT": {
       const updatedClients = state.clients.map((c) =>
-        c.id === action.id
-          ? createClient(c.id, action.max, action.allocated)
-          : c
+        c.id === action.id ? createClient(c.id, action.max, 0) : c
       );
-      const sumAlloc = updatedClients.reduce((s, c) => s + c.allocated, 0);
       return {
         ...state,
         clients: updatedClients,
-        available: state.totalResources - sumAlloc,
+        available: state.totalResources,
         error: null,
       };
     }
 
-    case "START_SIMULATION": {
+    case "START_ROUTE": {
       const validation = validateSetup(state.totalResources, state.clients);
       if (!validation.valid) {
-        return { ...state, error: validation.error ?? "Neplatny vstup." };
+        return { ...state, error: validation.error ?? "Neplatný vstup." };
       }
-      const initialSafety = runSafetyCheck(state.available, state.clients);
-      return {
-        ...state,
-        phase: "simulation",
-        error: null,
-        safetyResult: initialSafety,
-      };
+      const routeResult = findShortestRoute(state.totalResources, state.clients);
+      if (!routeResult.possible) {
+        return { ...state, error: "Nelze najít cestu — některý klient potřebuje více než celkové prostředky." };
+      }
+      return { ...state, phase: "route", error: null, routeResult };
     }
-
-    case "SUBMIT_REQUEST": {
-      const { clientIndex, amount } = action;
-      const { result, newAvailable, newClients } = processRequest(
-        clientIndex,
-        amount,
-        state.available,
-        state.clients
-      );
-      const entry: HistoryEntry = {
-        id: state.history.length,
-        clientId: state.clients[clientIndex].id,
-        clientName: state.clients[clientIndex].name,
-        request: amount,
-        approved: result.approved,
-        reason: result.reason,
-        safeSequence: result.safetyResult?.safe
-          ? result.safetyResult.sequence
-          : undefined,
-        timestamp: new Date(),
-      };
-      return {
-        ...state,
-        available: newAvailable,
-        clients: newClients,
-        safetyResult: result.safetyResult ?? state.safetyResult,
-        history: [entry, ...state.history],
-        pendingRequest: { clientIndex, amount },
-        phase: "safety-check",
-      };
-    }
-
-    case "COMPLETE_SAFETY_CHECK":
-      return {
-        ...state,
-        phase: "simulation",
-        pendingRequest: null,
-      };
 
     case "SET_ERROR":
       return { ...state, error: action.error };
@@ -188,8 +119,7 @@ export function useBankerState() {
     []
   );
   const addClient = useCallback(
-    (max: number, allocated: number) =>
-      dispatch({ type: "ADD_CLIENT", max, allocated }),
+    (max: number) => dispatch({ type: "ADD_CLIENT", max }),
     []
   );
   const removeClient = useCallback(
@@ -197,21 +127,12 @@ export function useBankerState() {
     []
   );
   const updateClient = useCallback(
-    (id: number, max: number, allocated: number) =>
-      dispatch({ type: "UPDATE_CLIENT", id, max, allocated }),
+    (id: number, max: number) =>
+      dispatch({ type: "UPDATE_CLIENT", id, max }),
     []
   );
-  const startSimulation = useCallback(
-    () => dispatch({ type: "START_SIMULATION" }),
-    []
-  );
-  const submitRequest = useCallback(
-    (clientIndex: number, amount: number) =>
-      dispatch({ type: "SUBMIT_REQUEST", clientIndex, amount }),
-    []
-  );
-  const completeSafetyCheck = useCallback(
-    () => dispatch({ type: "COMPLETE_SAFETY_CHECK" }),
+  const startRoute = useCallback(
+    () => dispatch({ type: "START_ROUTE" }),
     []
   );
   const setError = useCallback(
@@ -226,9 +147,7 @@ export function useBankerState() {
     addClient,
     removeClient,
     updateClient,
-    startSimulation,
-    submitRequest,
-    completeSafetyCheck,
+    startRoute,
     setError,
     reset,
   };
