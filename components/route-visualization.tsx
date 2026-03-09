@@ -6,7 +6,15 @@ import { type Route } from "@/lib/banker"
 import { AnimatedNumber } from "@/components/animated-number"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Card, CardContent } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 import { cn } from "@/lib/utils"
 
 type AnimPhase = "highlight" | "lend" | "return" | "pause"
@@ -311,6 +319,63 @@ export function RouteVisualization({
               )
               .join(" → ")}
           </span>
+        </motion.div>
+      )}
+
+      {/* Results table after animation completes */}
+      {complete && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="flex flex-col gap-4"
+        >
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm">Přehled kol</CardTitle>
+            </CardHeader>
+            <CardContent className="flex flex-col gap-4">
+              {route.rounds.map((round, ri) => (
+                <div key={ri} className="rounded-md border px-4 py-3">
+                  <div className="mb-2 flex items-center justify-between">
+                    <span className="text-sm font-medium">Kolo {ri + 1}</span>
+                    <span className="text-xs text-muted-foreground">
+                      Dostupné: {fmt(round.availableBefore)} Kč →{" "}
+                      {fmt(round.availableAfter)} Kč
+                    </span>
+                  </div>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Klient</TableHead>
+                        <TableHead className="text-right">Půjčeno</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {round.clients.map((clientIdx, j) => (
+                        <TableRow key={clientIdx}>
+                          <TableCell className="font-medium">
+                            K{clientIdx + 1}
+                          </TableCell>
+                          <TableCell className="text-right font-mono">
+                            {fmt(round.amounts[j])} Kč
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                      <TableRow>
+                        <TableCell className="font-medium text-muted-foreground">
+                          Celkem v kole
+                        </TableCell>
+                        <TableCell className="text-right font-mono text-muted-foreground">
+                          {fmt(round.totalLent)} Kč
+                        </TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
         </motion.div>
       )}
     </div>
