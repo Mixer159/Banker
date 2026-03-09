@@ -6,22 +6,10 @@ import { type Route, findShortestRoute, validateSetup } from "@/lib/banker"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
+import { RouteVisualization } from "@/components/route-visualization"
 
 const MIN_CLIENTS = 2
 const MAX_CLIENTS = 8
-
-function fmt(n: number) {
-  return n.toLocaleString("cs-CZ")
-}
 
 function fmtInput(value: string) {
   const digits = value.replace(/\D/g, "")
@@ -177,119 +165,7 @@ export default function Page() {
   // Result phase
   return (
     <div className="mx-auto flex min-h-svh max-w-3xl flex-col gap-6 p-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-lg font-medium">Bankéřův algoritmus</h1>
-          <p className="text-sm text-muted-foreground">
-            Celkové prostředky: {fmt(route!.totalResources)} Kč
-          </p>
-        </div>
-        <Button variant="outline" size="sm" onClick={handleReset}>
-          Zpět
-        </Button>
-      </div>
-
-      {/* Route */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-3 text-sm">
-            Nejkratší cesta
-            <Badge variant="outline" className="font-mono text-xs">
-              {route!.rounds.length} {route!.rounds.length === 1 ? "kolo" : route!.rounds.length < 5 ? "kola" : "kol"}
-            </Badge>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-4">
-          {route!.rounds.map((round, ri) => (
-            <div key={ri} className="rounded-md border px-4 py-3">
-              <div className="mb-2 flex items-center justify-between">
-                <span className="text-sm font-medium">Kolo {ri + 1}</span>
-                <span className="text-xs text-muted-foreground">
-                  Dostupné: {fmt(round.availableBefore)} Kč → {fmt(round.availableAfter)} Kč
-                </span>
-              </div>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Klient</TableHead>
-                    <TableHead className="text-right">Půjčeno</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {round.clients.map((clientIdx, j) => (
-                    <TableRow key={clientIdx}>
-                      <TableCell className="font-medium">K{clientIdx + 1}</TableCell>
-                      <TableCell className="text-right font-mono">
-                        {fmt(round.amounts[j])} Kč
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                  <TableRow>
-                    <TableCell className="font-medium text-muted-foreground">
-                      Celkem v kole
-                    </TableCell>
-                    <TableCell className="text-right font-mono text-muted-foreground">
-                      {fmt(round.totalLent)} Kč
-                    </TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
-            </div>
-          ))}
-        </CardContent>
-      </Card>
-
-      {/* Summary */}
-      <div className="rounded-md border border-primary/30 bg-primary/5 px-4 py-3 text-sm">
-        Všichni klienti obslouženi v{" "}
-        <span className="font-medium">
-          {route!.rounds.length} {route!.rounds.length === 1 ? "kole" : route!.rounds.length < 5 ? "kolech" : "kolech"}
-        </span>
-        . Posloupnost:{" "}
-        <span className="font-medium">
-          {route!.rounds
-            .map(
-              (r, ri) =>
-                `Kolo ${ri + 1}: ${r.clients.map((c) => `K${c + 1}`).join(", ")}`,
-            )
-            .join(" → ")}
-        </span>
-      </div>
-
-      {/* Client overview */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-sm">Požadavky klientů</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Klient</TableHead>
-                <TableHead className="text-right">Požadavek</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {route!.needs.map((need, i) => (
-                <TableRow key={i}>
-                  <TableCell className="font-medium">K{i + 1}</TableCell>
-                  <TableCell className="text-right font-mono">
-                    {fmt(need)} Kč
-                  </TableCell>
-                </TableRow>
-              ))}
-              <TableRow>
-                <TableCell className="font-medium text-muted-foreground">
-                  Celkem
-                </TableCell>
-                <TableCell className="text-right font-mono text-muted-foreground">
-                  {fmt(route!.needs.reduce((a, b) => a + b, 0))} Kč
-                </TableCell>
-              </TableRow>
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+      <RouteVisualization route={route!} onReset={handleReset} />
     </div>
   )
 }
