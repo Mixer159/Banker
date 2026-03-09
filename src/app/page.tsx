@@ -3,6 +3,7 @@
 import { AnimatePresence } from "motion/react";
 import { useBankerState } from "@/hooks/useBankerState";
 import { SetupPhase } from "@/components/SetupPhase";
+import { SimulationPhase } from "@/components/SimulationPhase";
 
 export default function Home() {
   const {
@@ -33,6 +34,18 @@ export default function Home() {
             onRemoveClient={removeClient}
             onUpdateClient={updateClient}
             onStart={startSimulation}
+          />
+        )}
+        {(state.phase === "simulation" || state.phase === "safety-check") && (
+          <SimulationPhase
+            key="simulation"
+            totalResources={state.totalResources}
+            available={state.available}
+            clients={state.clients}
+            safetyResult={state.safetyResult}
+            history={state.history}
+            onSubmitRequest={submitRequest}
+            onReset={reset}
           />
         )}
       </AnimatePresence>
