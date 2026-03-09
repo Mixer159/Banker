@@ -3,8 +3,6 @@
 import { AnimatePresence, motion } from "motion/react";
 import { useBankerState } from "@/hooks/useBankerState";
 import { SetupPhase } from "@/components/SetupPhase";
-import { SimulationPhase } from "@/components/SimulationPhase";
-import { SafetyCheckOverlay } from "@/components/SafetyCheckOverlay";
 import { FloatingCoins } from "@/components/FloatingCoins";
 
 export default function Home() {
@@ -14,9 +12,7 @@ export default function Home() {
     addClient,
     removeClient,
     updateClient,
-    startSimulation,
-    submitRequest,
-    completeSafetyCheck,
+    startRoute,
     reset,
     setError,
   } = useBankerState();
@@ -44,38 +40,20 @@ export default function Home() {
             key="setup"
             totalResources={state.totalResources}
             clients={state.clients}
-            available={state.available}
             error={state.error}
             onSetTotal={setTotal}
             onAddClient={addClient}
             onRemoveClient={removeClient}
             onUpdateClient={updateClient}
-            onStart={startSimulation}
+            onStart={startRoute}
           />
         )}
-        {(state.phase === "simulation" || state.phase === "safety-check") && (
-          <SimulationPhase
-            key="simulation"
-            totalResources={state.totalResources}
-            available={state.available}
-            clients={state.clients}
-            safetyResult={state.safetyResult}
-            history={state.history}
-            onSubmitRequest={submitRequest}
-            onReset={reset}
-          />
-        )}
-      </AnimatePresence>
-
-      <AnimatePresence>
-        {state.phase === "safety-check" && state.safetyResult && (
-          <SafetyCheckOverlay
-            safetyResult={state.safetyResult}
-            clients={state.clients}
-            available={state.available}
-            pendingRequest={state.pendingRequest}
-            onComplete={completeSafetyCheck}
-          />
+        {/* Route visualization will be wired in Task 5 */}
+        {state.phase === "route" && state.routeResult && (
+          <div key="route" className="mx-auto max-w-4xl px-4 py-8 text-center text-amber-900">
+            <p>Route visualization coming soon...</p>
+            <button onClick={reset} className="mt-4 underline">Reset</button>
+          </div>
         )}
       </AnimatePresence>
     </main>

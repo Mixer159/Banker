@@ -4,7 +4,6 @@ import { motion, AnimatePresence } from "motion/react";
 import { Plus, Play, Coins } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { AnimatedNumber } from "@/components/AnimatedNumber";
 import { NumberInput } from "@/components/NumberInput";
 import { ClientCardSetup } from "@/components/ClientCardSetup";
 import type { Client } from "@/lib/banker";
@@ -12,19 +11,17 @@ import type { Client } from "@/lib/banker";
 interface SetupPhaseProps {
   totalResources: number;
   clients: Client[];
-  available: number;
   error: string | null;
   onSetTotal: (total: number) => void;
-  onAddClient: (max: number, allocated: number) => void;
+  onAddClient: (max: number) => void;
   onRemoveClient: (id: number) => void;
-  onUpdateClient: (id: number, max: number, allocated: number) => void;
+  onUpdateClient: (id: number, max: number) => void;
   onStart: () => void;
 }
 
 export function SetupPhase({
   totalResources,
   clients,
-  available,
   error,
   onSetTotal,
   onAddClient,
@@ -87,20 +84,6 @@ export function SetupPhase({
               className="border-amber-200 text-lg focus-visible:border-amber-400 focus-visible:ring-amber-200"
             />
           </div>
-          {totalResources > 0 && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="flex items-center gap-2 rounded-lg bg-amber-50 px-4 py-2"
-            >
-              <span className="text-sm font-medium text-amber-700">Dostupné:</span>
-              <AnimatedNumber
-                value={available}
-                suffix=" Kč"
-                className="text-xl font-bold text-amber-900"
-              />
-            </motion.div>
-          )}
         </div>
       </motion.div>
 
@@ -124,7 +107,7 @@ export function SetupPhase({
                 name={client.name}
                 max={client.max}
                 onChangeMax={(val) =>
-                  onUpdateClient(client.id, val, 0)
+                  onUpdateClient(client.id, val)
                 }
                 onRemove={() => onRemoveClient(client.id)}
               />
@@ -135,7 +118,7 @@ export function SetupPhase({
           {clients.length < 4 && (
             <motion.button
               layout
-              onClick={() => onAddClient(0, 0)}
+              onClick={() => onAddClient(0)}
               className="flex min-h-[140px] flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-amber-300 bg-amber-50/50 text-amber-600 transition-colors hover:border-amber-400 hover:bg-amber-50 hover:text-amber-700"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
@@ -181,7 +164,7 @@ export function SetupPhase({
           className="h-12 gap-2 rounded-xl bg-amber-600 px-8 text-base font-semibold text-white shadow-lg transition-all hover:bg-amber-700 hover:shadow-xl disabled:opacity-50"
         >
           <Play className="size-5" />
-          Spustit simulaci
+          Najít nejkratší cestu
         </Button>
       </motion.div>
     </motion.div>
