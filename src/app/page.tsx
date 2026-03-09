@@ -4,6 +4,7 @@ import { AnimatePresence } from "motion/react";
 import { useBankerState } from "@/hooks/useBankerState";
 import { SetupPhase } from "@/components/SetupPhase";
 import { SimulationPhase } from "@/components/SimulationPhase";
+import { SafetyCheckOverlay } from "@/components/SafetyCheckOverlay";
 
 export default function Home() {
   const {
@@ -46,6 +47,18 @@ export default function Home() {
             history={state.history}
             onSubmitRequest={submitRequest}
             onReset={reset}
+          />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {state.phase === "safety-check" && state.safetyResult && (
+          <SafetyCheckOverlay
+            safetyResult={state.safetyResult}
+            clients={state.clients}
+            available={state.available}
+            pendingRequest={state.pendingRequest}
+            onComplete={completeSafetyCheck}
           />
         )}
       </AnimatePresence>
