@@ -70,6 +70,8 @@ export function RouteVisualization({
   }
 
   // Compute displayed available resources based on phase
+  // In this algorithm, clients return all money after each round,
+  // so availableBefore === totalResources for every round.
   const displayedAvailable = React.useMemo(() => {
     if (!started || complete) {
       return route.totalResources
@@ -298,11 +300,7 @@ export function RouteVisualization({
           Všichni klienti obslouženi v{" "}
           <span className="font-medium">
             {route.rounds.length}{" "}
-            {route.rounds.length === 1
-              ? "kole"
-              : route.rounds.length < 5
-                ? "kolech"
-                : "kolech"}
+            {route.rounds.length === 1 ? "kole" : "kolech"}
           </span>
           . Posloupnost:{" "}
           <span className="font-medium">

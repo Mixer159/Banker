@@ -163,9 +163,10 @@ export default function Page() {
   }
 
   // Result phase
+  if (!route) return null
   return (
     <div className="mx-auto flex min-h-svh max-w-3xl flex-col gap-6 p-6">
-      <RouteVisualization route={route!} onReset={handleReset} />
+      <RouteVisualization route={route} onReset={handleReset} />
     </div>
   )
 }
