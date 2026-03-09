@@ -118,6 +118,10 @@
   --sidebar-ring: oklch(0.72 0.14 75);
 }
 
+input[type="number"]:focus {
+  box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.2);
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
