@@ -206,60 +206,68 @@ export function RouteVisualization({
             (currentPhase === "lend" || currentPhase === "return")
 
           return (
-            <motion.div
-              key={i}
-              animate={{
-                scale: status === "active" ? 1.05 : 1,
-                opacity:
-                  started &&
-                  status === "waiting" &&
-                  currentPhase !== "pause"
-                    ? 0.5
-                    : 1,
-              }}
-              transition={{ type: "spring", stiffness: 300, damping: 25 }}
-            >
-              <Card
-                size="sm"
-                className={cn(
-                  "transition-colors duration-500",
-                  status === "active" && "ring-2 ring-primary",
-                  status === "done" && "bg-primary/5 ring-1 ring-primary/30",
-                )}
+            <div key={i} className="p-1">
+              <motion.div
+                className="h-full transform-gpu will-change-transform"
+                animate={{
+                  scale: status === "active" ? 1.04 : 1,
+                  opacity:
+                    started &&
+                    status === "waiting" &&
+                    currentPhase !== "pause"
+                      ? 0.5
+                      : 1,
+                }}
+                transition={{ duration: 0.2, ease: "easeOut" }}
               >
-                <CardContent className="flex flex-col items-center gap-1 py-3 text-center">
-                  <span className="text-xs font-medium text-muted-foreground">
-                    K{i + 1}
-                  </span>
-                  <span className="text-sm font-medium">{fmt(need)} Kč</span>
-                  {status === "done" && (
-                    <span className="text-xs text-primary">✓</span>
+                <Card
+                  size="sm"
+                  className={cn(
+                    "h-full transition-colors duration-300",
+                    status === "active" && "ring-2 ring-primary",
+                    status === "done" && "bg-primary/5 ring-1 ring-primary/30",
                   )}
-                  <AnimatePresence>
-                    {showAmount && currentPhase === "lend" && (
-                      <motion.span
-                        initial={{ opacity: 0, y: -5 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0 }}
-                        className="text-xs font-medium text-destructive"
-                      >
-                        −{fmt(need)} Kč
-                      </motion.span>
+                >
+                  <CardContent className="flex flex-col items-center gap-1 py-3 text-center">
+                    <span className="text-xs font-medium text-muted-foreground">
+                      K{i + 1}
+                    </span>
+                    <span className="text-sm font-medium">{fmt(need)} Kč</span>
+                    {status === "done" && (
+                      <span className="text-xs text-primary">✓</span>
                     )}
-                    {showAmount && currentPhase === "return" && (
-                      <motion.span
-                        initial={{ opacity: 0, y: -5 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0 }}
-                        className="text-xs font-medium text-primary"
-                      >
-                        +{fmt(need)} Kč
-                      </motion.span>
-                    )}
-                  </AnimatePresence>
-                </CardContent>
-              </Card>
-            </motion.div>
+                    <div className="flex h-4 items-center justify-center overflow-hidden">
+                      <AnimatePresence initial={false} mode="wait">
+                        {showAmount && currentPhase === "lend" && (
+                          <motion.span
+                            key="lend"
+                            initial={{ opacity: 0, y: -4 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: 4 }}
+                            transition={{ duration: 0.16, ease: "easeOut" }}
+                            className="block text-xs font-medium text-destructive"
+                          >
+                            −{fmt(need)} Kč
+                          </motion.span>
+                        )}
+                        {showAmount && currentPhase === "return" && (
+                          <motion.span
+                            key="return"
+                            initial={{ opacity: 0, y: -4 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: 4 }}
+                            transition={{ duration: 0.16, ease: "easeOut" }}
+                            className="block text-xs font-medium text-primary"
+                          >
+                            +{fmt(need)} Kč
+                          </motion.span>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            </div>
           )
         })}
       </div>
